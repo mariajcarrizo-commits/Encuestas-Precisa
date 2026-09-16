@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encuesta TDAH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F7FA;
+    --surface: #FFFFFF;
+    --ink: #16263B;
+    --muted: #55657A;
+    --line: #CBD4DF;
+    --brand: #1F4E79;
+    --pick: #1F7A5C;
+    --pick-soft: #E3F3EC;
+    --wa: #1E8E4E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1722; --surface: #18222F; --ink: #EEF2F7; --muted: #A5B2C2;
+      --line: #334255; --brand: #8DB8E6; --pick: #5BC69C; --pick-soft: #173529; --wa: #2FAE66;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1722; --surface: #18222F; --ink: #EEF2F7; --muted: #A5B2C2;
+    --line: #334255; --brand: #8DB8E6; --pick: #5BC69C; --pick-soft: #173529; --wa: #2FAE66;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 20px; line-height: 1.45;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 20px 18px 40px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  header h1 { font-size: 1.05rem; margin: 0; color: var(--brand); }
+  .count { font-size: 1rem; color: var(--muted); white-space: nowrap; }
+  .bar { height: 8px; background: var(--line); border-radius: 8px; margin: 12px 0 26px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--brand); transition: width .3s ease; }
+  .qnum { font-size: 3.2rem; font-weight: 700; line-height: 1; color: var(--brand); margin: 0 0 10px; }
+  .qtext { font-size: 1.3rem; font-weight: 700; margin: 0 0 22px; }
+  .opts { display: flex; flex-direction: column; gap: 12px; }
+  .opt {
+    display: flex; gap: 14px; align-items: flex-start; width: 100%; text-align: left;
+    background: var(--surface); color: var(--ink); border: 2px solid var(--line); border-radius: 14px;
+    padding: 16px; font: inherit; font-size: 1.05rem; cursor: pointer; min-height: 64px;
+  }
+  .opt .letter {
+    flex: 0 0 38px; height: 38px; border-radius: 50%; border: 2px solid var(--line);
+    display: grid; place-items: center; font-weight: 700; color: var(--muted);
+  }
+  .opt.sel { border-color: var(--pick); background: var(--pick-soft); }
+  .opt.sel .letter { background: var(--pick); border-color: var(--pick); color: #fff; }
+  .opt:focus-visible, button:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+  .btn {
+    font: inherit; font-size: 1.05rem; font-weight: 700; padding: 14px 20px; border-radius: 12px;
+    border: 2px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .btn[disabled] { opacity: .4; cursor: default; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  :root[data-theme="dark"] .btn.primary { color: #0F1722; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0F1722; } }
+  .summary h2 { font-size: 1.6rem; margin: 0 0 6px; }
+  .summary p.lead { color: var(--muted); margin: 0 0 20px; }
+  .row {
+    display: flex; gap: 14px; background: var(--surface); border: 2px solid var(--line);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; width: 100%;
+    text-align: left; font: inherit; color: var(--ink); cursor: pointer;
+  }
+  .row b { color: var(--brand); flex: 0 0 auto; font-size: 1.2rem; }
+  .row .ans { font-size: 1rem; }
+  .row .change { display: block; color: var(--muted); font-size: .9rem; margin-top: 4px; }
+  .row.missing { border-color: #C0392B; }
+  .send {
+    display: block; width: 100%; margin-top: 18px; padding: 20px; font: inherit; font-size: 1.25rem;
+    font-weight: 700; border: 0; border-radius: 14px; background: var(--wa); color: #fff; cursor: pointer;
+    text-align: center; text-decoration: none; box-sizing: border-box;
+  }
+  .copy { display: block; width: 100%; margin-top: 10px; }
+  .toast { text-align: center; color: var(--pick); font-weight: 700; min-height: 1.5em; margin-top: 10px; }
+  .hidden { display: none; }
+  @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Encuesta TDAH</h1>
+    <span class="count" id="count"></span>
+  </header>
+  <div class="bar"><span id="bar"></span></div>
+
+  <main id="quiz">
+    <p class="qnum" id="qnum"></p>
+    <p class="qtext" id="qtext"></p>
+    <div class="opts" id="opts"></div>
+    <div class="nav">
+      <button class="btn" id="prev">Anterior</button>
+      <button class="btn primary" id="next">Siguiente</button>
+    </div>
+  </main>
+
+  <section class="summary hidden" id="summary">
+    <h2>Listo, revisá tus respuestas</h2>
+    <p class="lead">Tocá una respuesta si querés cambiarla. Después tocá el botón verde.</p>
+    <div id="rows"></div>
+    <a class="send" id="send" href="#" target="_top" rel="noopener">Enviar por WhatsApp</a>
+    <button class="btn copy" id="copy">Copiar respuestas</button>
+    <p id="fallback" style="text-align:center; margin-top:14px;"></p>
+    <div class="toast" id="toast"></div>
+  </section>
+</div>
+
+<script>
+// Número de WhatsApp de destino (con código de país, sin + ni espacios, ej: 5491112345678).
+// Si queda vacío, WhatsApp le pide elegir el contacto.
+const WHATSAPP_NUMERO = "5491166478496";
+
+const PREGUNTAS = [
+  { q: "Considerando su práctica asistencial actual, ¿cuál de las siguientes opciones describe mejor su experiencia en el abordaje de pacientes con Trastorno por Déficit de Atención (TDAH)?",
+    o: ["Mi práctica se enfoca principalmente en pacientes en edad infanto-juvenil con TDAH.",
+        "Mi práctica se enfoca principalmente en pacientes adultos con TDAH.",
+        "Mi práctica incluye el tratamiento de pacientes con TDAH en cualquier etapa de la vida.",
+        "Actualmente no trato pacientes con diagnóstico de TDAH en mi consulta."] },
+  { q: "¿En qué ámbito desarrolla mayoritariamente su práctica clínica asistencial?",
+    o: ["Práctica privada.",
+        "Empresa de Medicina Prepaga u Obra Social.",
+        "Ámbito público (Hospital / Centro de Salud).",
+        "Mi práctica se distribuye de forma equitativa entre el sector público y el privado."] },
+  { q: "En promedio, ¿cuántos pacientes con sospecha o diagnóstico confirmado de TDAH evalúa en su consulta mensualmente?",
+    o: ["Más de 20 pacientes por mes.",
+        "Entre 5 y 20 pacientes por mes.",
+        "Menos de 5 pacientes por mes.",
+        "Mi práctica actual no se centra en esta patología, aunque puedo recibir consultas esporádicas."] },
+  { q: "Si tuviera pacientes en edad escolar o adultos con TDAH y una alta demanda cognitiva durante las primeras horas del día, ¿qué característica del medicamento para su tratamiento priorizaría al elegir un estimulante?",
+    o: ["Considero prioritario un inicio de acción rápido: que brinde la liberación de una dosis inmediata para alcanzar el primer pico de concentración plasmática de forma temprana, aunque luego el efecto descienda a lo largo del día.",
+        "Considero ideal una formulación que combine un rápido inicio de acción con el mantenimiento del efecto en la segunda parte del día: buscando cubrir tanto el inicio de la jornada como las actividades vespertinas con una sola toma.",
+        "Considero preferible una liberación ascendente progresiva: que inicie con una liberación de dosis inmediata menor y alcance su pico máximo de concentración recién hacia la media tarde.",
+        "Lo considero indistinto: la rapidez del inicio de acción no es un factor que condicione mi elección terapéutica en este tipo de pacientes."] },
+  { q: "Si tuviera que tratar a un paciente con un medicamento estimulante de larga duración, ¿cuál sería su mayor preocupación respecto a que el efecto del medicamento se extienda más allá de las 8 o 9 horas de la toma?",
+    o: ["Considero preocupante que genere anorexia (falta de apetito), especialmente en el horario de la cena, impidiendo una adecuada compensación nutricional del paciente.",
+        "Considero crítico el riesgo de insomnio de conciliación que afecten el inicio y la calidad del sueño.",
+        "Considero relevante el aumento de la labilidad afectiva o irritabilidad asociado al agotamiento del efecto en un horario nocturno tardío (\"efecto rebote\" tardío).",
+        "No tengo ninguna preocupación en particular ya que considero prioritaria la cobertura continua de más de 9 horas, independientemente de la presencia de estos efectos secundarios."] },
+  { q: "Imagine que recibe a un paciente pediátrico con diagnóstico de TDAH. Durante la consulta, la madre le manifiesta que el niño todavía no puede tragar pastillas o comprimidos sólidos. Ante esta situación, ¿qué conducta consideraría más apropiada para asegurar el cumplimiento del tratamiento?",
+    o: ["Considero prioritario el uso de cápsulas que permitan ser abiertas para esparcir su contenido sobre alimentos blandos (yogur, puré) sin alterar la liberación del medicamento.",
+        "Considero la opción de triturar o fragmentar comprimidos para facilitar la ingesta, aun asumiendo que esto podría modificar la forma en que se absorbe la medicación.",
+        "Considero la rotación hacia formulaciones de liberación inmediata, que suelen ser comprimidos más pequeños, aunque esto requiera que el paciente realice varias tomas durante el día.",
+        "Considero que, ante la imposibilidad de deglución, es preferible postergar el tratamiento farmacológico: priorizando únicamente el abordaje psicopedagógico o conductual."] },
+  { q: "Si tuviera que tratar a un paciente con TDAH, ¿cuál consideraría que es el desafío clínico más difícil de resolver para asegurar el cumplimiento del tratamiento a largo plazo?",
+    o: ["Considero que el mayor desafío es lograr una eficacia óptima durante la jornada escolar o laboral sin comprometer el descanso nocturno ni el apetito vespertino.",
+        "Considero que lo más difícil es mantener una estimulación constante superior a las 12 horas, asumiendo el riesgo de efectos residuales durante la noche.",
+        "Considero que el principal reto es evitar la variabilidad en el rendimiento matutino que se produce cuando la medicación tiene un inicio de acción lento.",
+        "Considero que el factor más crítico es el costo del tratamiento y las dificultades de acceso, que suelen comprometer la continuidad en una condición crónica."] },
+  { q: "¿Qué importancia le asigna a la flexibilidad de conversión con el metilfenidato (ej: poder pasar de 10mg IR en desayuno y 10mg IR en almuerzo a una sola cápsula de 20mg LA)?",
+    o: ["Muy alta: facilita la transición del paciente a un esquema de toma única sin cambiar la dosis total diaria a la que ya está adaptado.",
+        "Media: es una ventaja técnica útil, pero no es determinante en mi elección de marca.",
+        "Baja: prefiero recalcular la dosis desde cero utilizando otras formulaciones de liberación prolongada.",
+        "Nula: no realizo este tipo de conversiones en mi práctica habitual."] },
+  { q: "Ante un paciente escolar de 9 años que requiere concentración máxima de metilfenidato desde las 8:00 AM, pero cuya madre reporta que el niño tiene bajo peso. ¿Cuál sería su elección?",
+    o: ["Metilfenidato de Liberación Inmediata (IR).",
+        "Metilfenidato de Liberación Modificada (LA).",
+        "Metilfenidato de Liberación Osmótica (OROS).",
+        "Lisdexanfetamina.",
+        "Atomoxetina."] },
+  { q: "Paciente adolescente o adulto joven que inicia estudios universitarios, con antecedentes de irritabilidad marcada al final de la tarde con formulaciones de liberación osmótica (OROS). ¿Qué estrategia prefiere?",
+    o: ["Metilfenidato de Liberación Inmediata (IR).",
+        "Metilfenidato de Liberación Modificada (LA).",
+        "Lisdexanfetamina.",
+        "Atomoxetina.",
+        "Rotación a terapias no farmacológicas."] }
+];
+
+const LETRAS = "ABCDE";
+const respuestas = new Array(PREGUNTAS.length).fill(null);
+let actual = 0;
+let volverAResumen = false;
+
+const $ = id => document.getElementById(id);
+
+function pintarProgreso() {
+  const hechas = respuestas.filter(r => r !== null).length;
+  $("bar").style.width = (hechas / PREGUNTAS.length * 100) + "%";
+  $("count").textContent = hechas + " de " + PREGUNTAS.length + " respondidas";
+}
+
+function mostrarPregunta(i) {
+  actual = i;
+  const p = PREGUNTAS[i];
+  $("quiz").classList.remove("hidden");
+  $("summary").classList.add("hidden");
+  $("qnum").textContent = "Pregunta " + (i + 1);
+  $("qtext").textContent = p.q;
+  const cont = $("opts");
+  cont.innerHTML = "";
+  p.o.forEach((texto, j) => {
+    const b = document.createElement("button");
+    b.className = "opt" + (respuestas[i] === j ? " sel" : "");
+    b.innerHTML = '<span class="letter">' + LETRAS[j] + '</span><span></span>';
+    b.lastChild.textContent = texto;
+    b.onclick = () => elegir(j);
+    cont.appendChild(b);
+  });
+  $("prev").disabled = i === 0;
+  $("next").textContent = volverAResumen ? "Volver al resumen" : (i === PREGUNTAS.length - 1 ? "Ver resumen" : "Siguiente");
+  pintarProgreso();
+  window.scrollTo(0, 0);
+}
+
+function elegir(j) {
+  respuestas[actual] = j;
+  [...$("opts").children].forEach((el, k) => el.classList.toggle("sel", k === j));
+  pintarProgreso();
+  setTimeout(avanzar, 450);
+}
+
+function avanzar() {
+  if (volverAResumen || actual === PREGUNTAS.length - 1) { mostrarResumen(); return; }
+  mostrarPregunta(actual + 1);
+}
+
+function mostrarResumen() {
+  volverAResumen = true;
+  $("quiz").classList.add("hidden");
+  $("summary").classList.remove("hidden");
+  const rows = $("rows");
+  rows.innerHTML = "";
+  PREGUNTAS.forEach((p, i) => {
+    const r = respuestas[i];
+    const b = document.createElement("button");
+    b.className = "row" + (r === null ? " missing" : "");
+    const num = document.createElement("b");
+    num.textContent = (i + 1) + ".";
+    const ans = document.createElement("span");
+    ans.className = "ans";
+    ans.textContent = r === null ? "Falta responder" : LETRAS[r] + ") " + p.o[r];
+    const ch = document.createElement("span");
+    ch.className = "change";
+    ch.textContent = r === null ? "Tocá para responder" : "Tocá para cambiar";
+    ans.appendChild(ch);
+    b.append(num, ans);
+    b.onclick = () => mostrarPregunta(i);
+    rows.appendChild(b);
+  });
+  pintarProgreso();
+  actualizarLinkEnvio();
+  window.scrollTo(0, 0);
+}
+
+function actualizarLinkEnvio() {
+  const base = WHATSAPP_NUMERO ? "https://wa.me/" + WHATSAPP_NUMERO : "https://wa.me/";
+  const url = base + "?text=" + encodeURIComponent(armarMensaje());
+  $("send").href = url;
+  const fb = $("fallback");
+  fb.innerHTML = "";
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_top";
+  a.rel = "noopener";
+  a.textContent = "¿No pasó nada? Tocá acá";
+  a.style.color = "var(--muted)";
+  fb.appendChild(a);
+}
+
+function armarMensaje() {
+  let txt = "Respuestas encuesta TDAH:\n\n";
+  PREGUNTAS.forEach((p, i) => {
+    const r = respuestas[i];
+    txt += (i + 1) + ") " + (r === null ? "SIN RESPONDER" : LETRAS[r] + " - " + p.o[r]) + "\n\n";
+  });
+  return txt.trim();
+}
+
+function faltantes() { return respuestas.filter(r => r === null).length; }
+
+$("prev").onclick = () => { if (actual > 0) mostrarPregunta(actual - 1); };
+$("next").onclick = avanzar;
+
+$("send").addEventListener("click", (ev) => {
+  const f = faltantes();
+  if (f > 0 && !confirm("Faltan " + f + " respuesta(s). ¿Enviar igual?")) { ev.preventDefault(); return; }
+  // el href ya está armado por actualizarLinkEnvio(); el navegador sigue el link de forma nativa
+});
+
+$("copy").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(armarMensaje());
+    $("toast").textContent = "Respuestas copiadas";
+  } catch (e) {
+    $("toast").textContent = "No se pudo copiar. Usá el botón verde.";
+  }
+};
+
+mostrarPregunta(0);
+</script>
+</body>
+</html>
