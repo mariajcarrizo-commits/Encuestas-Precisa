@@ -90,7 +90,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Encuesta TDAH</h1>
+    <h1>Encuesta Esquizofrenia Bipolar</h1>
     <span class="count" id="count"></span>
   </header>
   <div class="bar"><span id="bar"></span></div>
@@ -268,7 +268,7 @@ function actualizarLinkEnvio() {
 }
 
 function armarMensaje() {
-  let txt = "Respuestas encuesta TDAH:\n\n";
+  let txt = "Respuestas encuesta " + TEMA_ENCUESTA + ":\n\n";
   PREGUNTAS.forEach((p, i) => {
     const r = respuestas[i];
     txt += (i + 1) + ") " + (r === null ? "SIN RESPONDER" : LETRAS[r] + " - " + p.o[r]) + "\n\n";
