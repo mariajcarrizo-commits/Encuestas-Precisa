@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Encuesta Esquizofrenia Bipolar</title>
+<title>Encuesta PRECISA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
@@ -38,6 +38,8 @@
   .wrap { max-width: 680px; margin: 0 auto; padding: 20px 18px 40px; }
   header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
   header h1 { font-size: 1.05rem; margin: 0; color: var(--brand); }
+  header .tema { font-size: .85rem; margin: 2px 0 0; color: var(--muted); }
+  header .titulos { display: flex; flex-direction: column; }
   .count { font-size: 1rem; color: var(--muted); white-space: nowrap; }
   .bar { height: 8px; background: var(--line); border-radius: 8px; margin: 12px 0 26px; overflow: hidden; }
   .bar span { display: block; height: 100%; width: 0; background: var(--brand); transition: width .3s ease; }
@@ -90,7 +92,10 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Encuesta Esquizofrenia Bipolar</h1>
+    <div class="titulos">
+      <h1>Encuesta PRECISA</h1>
+      <p class="tema" id="tema"></p>
+    </div>
     <span class="count" id="count"></span>
   </header>
   <div class="bar"><span id="bar"></span></div>
@@ -120,6 +125,10 @@
 // Número de WhatsApp de destino (con código de país, sin + ni espacios, ej: 5491112345678).
 // Si queda vacío, WhatsApp le pide elegir el contacto.
 const WHATSAPP_NUMERO = "5491166478496";
+
+// Tema de la encuesta actual: esta es la ÚNICA línea que hay que cambiar
+// cada vez que llega una encuesta nueva. Va entre comillas.
+const TEMA_ENCUESTA = "Esquizofrenia Bipolar";
 
 const PREGUNTAS = [
   { q: "¿Cuál de las siguientes opciones describe mejor su práctica clínica habitual?",
@@ -192,6 +201,7 @@ function pintarProgreso() {
 function mostrarPregunta(i) {
   actual = i;
   const p = PREGUNTAS[i];
+  $("tema").textContent = TEMA_ENCUESTA;
   $("quiz").classList.remove("hidden");
   $("summary").classList.add("hidden");
   $("qnum").textContent = "Pregunta " + (i + 1);
